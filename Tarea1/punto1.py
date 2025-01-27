@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tabulate import tabulate
+import scipy.integrate as integrate
 
 def punto1():
     fig_a, ax_a = plt.subplots(1,2,figsize=(10,5))
@@ -107,7 +108,14 @@ def punto1():
         table = [["Fenomeno","Posición x maximo(pm)", "FWHM(pm)"],["Pico de la izquierda",x1[imax],round(float(wpico1),4)],["Pico de la derecha",x1[imax2],round(float(wpico2),4)]
                  ,["Fondo",x1[ifmax],round(float(wfondo),4)]]
         print(tabulate(table,headers="firstrow"))
-    localizacion()
+        return x1,y1
+    def integracion():
+        x1,y1 = localizacion()
+        x1 = x1*10**-12
+        y1= y1*10**-29
+        print("1.d)", integrate.simpson(y1,x1))
+
+    integracion()
 
 
 
