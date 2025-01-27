@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from tabulate import tabulate
 
 def punto1():
     fig_a, ax_a = plt.subplots(1,2,figsize=(10,5))
@@ -46,12 +47,15 @@ def punto1():
         while(y1[i+1]-y1[i]<0):
             i+=1
         imax2 = np.argmax(y1[i:]) + i
+        i2 = imax2-5
+        while(y1[i2-1]-y1[i2]<0):
+            i2-=1
         avg = 0
-        for j in range(imax,imax2):
-            dy = y1[j+1] - y1[j-1]
-            dx = x1[j+1] - x1[j-1]
+        for j in range(i,i2):
+            dy = y1[j] - y1[j-1]
+            dx = x1[j] - x1[j-1]
             avg += abs(dy / dx) if dx !=0 else 0
-        avg /= imax2-imax
+        avg /= i2-i
         right = True
         left = True
         r = imax2
@@ -59,14 +63,14 @@ def punto1():
         while(right or left):
             if(right):
                 r+=1
-                dy = y1[r] - y1[r - 1]
-                dx = x1[r] - x1[r - 1]
+                dy = y1[r+1] - y1[r]
+                dx = x1[r+1] - x1[r]
                 right = True if abs(dy/dx)>=avg/15 else False
             if(left):
                 l-=1
                 dy = y1[l+1] - y1[l]
                 dx = x1[l+1] - x1[l]
-                left = True if abs(dy / dx) >= avg/25 else False
+                left = True if abs(dy/dx) >= avg/15 else False
         fig_b, ax_b = plt.subplots()
         ax_b.set_title("Rhodium Xray peaks")
         ax_b.set_xlabel("Wavelength (pm)")
@@ -74,9 +78,9 @@ def punto1():
         ax_b.scatter(x1[l:r+1],y1[l:r+1],s=5)
         fig_b.savefig("picos.pdf", format="pdf", bbox_inches="tight")
         print('1.b) Método: Tolerancia valor de las derivadas, partiendo de los picos')
-        return i,imax,imax2,r,l,x1,y1
+        return i,i2,imax,imax2,r,l,x1,y1
     def localizacion():
-        i,imax,imax2,r,l,x1,y1 = dosPicos()
+        i,i2,imax,imax2,r,l,x1,y1 = dosPicos()
         ###pico1:
         h = (y1[imax]+y1[i])/2
         for j in range(l,imax+1):
@@ -85,18 +89,24 @@ def punto1():
             w2 = k if k==imax or abs(y1[w2] - h)> abs(y1[k]-h) else w2
         wpico1 = x1[w2]-x1[w1]
         ###pico2:
-        h = (y1[imax2] + y1[i]) / 2
-        for j in range(i, imax2 + 1):
-            w1 = j if j == i or abs(y1[w1] - h) > abs(y1[j] - h) else w1
+        h = (y1[imax2] + y1[i2]) / 2
+        for j in range(i2, imax2 + 1):
+            w1 = j if j == i2 or abs(y1[w1] - h) > abs(y1[j] - h) else w1
         for k in range(imax2, r + 1):
             w2 = k if k == imax2 or abs(y1[w2] - h) > abs(y1[k] - h) else w2
         wpico2 = x1[w2] - x1[w1]
-
-        print(wpico1,y1[imax])
-        print(wpico2, y1[imax2])
-
-
-
+        ###fondo:
+        ifmax = np.argmax(y1[:l])
+        h = (y1[ifmax] - y1[0]) / 2
+        for j in range(0, ifmax):
+            w1 = j if j == 0 or abs(y1[w1] - h) > abs(y1[j] - h) else w1
+        for k in range(r, len(x1)):
+            w2 = k if k == r or abs(y1[w2] - h) > abs(y1[k] - h) else w2
+        wfondo = x1[w2] - x1[w1]
+        print("1.c)")
+        table = [["Fenomeno","Posición x maximo(pm)", "FWHM(pm)"],["Pico de la izquierda",x1[imax],round(float(wpico1),4)],["Pico de la derecha",x1[imax2],round(float(wpico2),4)]
+                 ,["Fondo",x1[ifmax],round(float(wfondo),4)]]
+        print(tabulate(table,headers="firstrow"))
     localizacion()
 
 
