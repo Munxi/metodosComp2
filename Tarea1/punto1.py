@@ -120,9 +120,5 @@ def punto1():
         E = integrate.simpson(y1,x1)
         print("1.d) E = (",round(E*10**43,4),"+/-",round((E - integrate.simpson(down,x1))*10**43,4),")x10^-43 J/m")
     integracion()
-
-
-
-
 punto1()
 
