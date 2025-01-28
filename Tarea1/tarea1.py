@@ -199,7 +199,7 @@ def punto2c():
 
     df = procesamiento_archivo_histeresis(nombre_archivo)
 
-    energy_loss = abs(np.trapezoid(df["Densidad campo interno (H) (A/m)"], df["Campo externo (B) (mT)"]))
+    energy_loss = abs(np.trapz(df["Densidad campo interno (H) (A/m)"], df["Campo externo (B) (mT)"]))
 
     # Crear el gráfico de H como función de B
     plt.figure(figsize=(10, 6))
