@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 ### Importación de bibliotecas
-"""
 
 import re
 import pandas as pd
