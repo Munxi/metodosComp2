@@ -68,13 +68,14 @@ def punto1():
         fig.savefig('1.b.pdf')
     def puntoc():
         t, y, sigma = np.genfromtxt('punto1.dat').T
+        f_nyq = 1/(2*np.average(np.diff(t)))
         y = y - np.average(y)
         fs = np.arange(0, 9, 1 / (5 * (t[-1] - t[0])))
         f_hat = Fourier(t, y, fs)
         freq = fs[np.argmax(np.abs(f_hat) ** 2)]
         phi = np.mod(freq * t, 1)
         fig = plt.figure()
-        print("1.c) f Nyquist: {:.3f}".format(freq))
+        print("1.c) f Nyquist: {:.3f}".format(f_nyq))
         print("1.c) f true: {:.3f}".format(freq))
         ax = fig.add_subplot(1, 1, 1)
         ax.set_title("y vs phi")
