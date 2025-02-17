@@ -328,7 +328,7 @@ def load_sunspot_data(file_path):
     return df
 
 # Configuraciones
-data_file = "sun_data.txt"
+data_file = "list_aavso-arssn_daily.txt"
 fecha_limite_str = "2010-10-10"       # Fecha hasta la que se usan los datos históricos
 fecha_extrapolacion_str = "2025-02-12"  # Fecha hasta la que se quiere extrapolar
 
