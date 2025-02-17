@@ -303,4 +303,106 @@ for i, alpha in enumerate(alphas):
 plt.tight_layout()
 plt.savefig('3.1.pdf')
 plt.show()
-     
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def load_sunspot_data(file_path):
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
+    # Buscar la línea donde empieza la tabla (se asume que la primera línea con "Year" es el encabezado)
+    start_index = next(i for i, line in enumerate(lines) if line.strip().startswith("Year"))
+    columns = ["Year", "Month", "Day", "SSN"]
+    data_list = []
+    for line in lines[start_index+1:]:
+        parts = line.strip().split()
+        if len(parts) == 4:
+            try:
+                data_list.append([int(parts[0]), int(parts[1]), int(parts[2]), int(parts[3])])
+            except ValueError:
+                continue
+    df = pd.DataFrame(data_list, columns=columns)
+    df["Date"] = pd.to_datetime(df[["Year", "Month", "Day"]])
+    df = df.sort_values("Date")
+    return df
+
+# Configuraciones
+data_file = "list_aavso-arssn_daily.txt"
+fecha_limite_str = "2010-10-10"       # Fecha hasta la que se usan los datos históricos
+fecha_extrapolacion_str = "2025-02-12"  # Fecha hasta la que se quiere extrapolar
+
+# Cargar y filtrar datos
+data = load_sunspot_data(data_file)
+fecha_limite = pd.to_datetime(fecha_limite_str)
+data = data[data["Date"] <= fecha_limite]
+
+# Extraer la serie de tiempo
+N = len(data)
+t = np.arange(N)
+y = data["SSN"].values
+
+# Aplicar FFT completa
+X_fft = np.fft.fft(y)
+
+# Calcular la frecuencia dominante (ignorando la componente DC) y su período en años
+freqs_full = np.fft.fftfreq(N, d=1)  # en ciclos por día
+dominant_index = np.argmax(np.abs(X_fft[1:N//2])) + 1
+dominant_freq = np.abs(freqs_full[dominant_index])
+P_solar = 1 / dominant_freq / 365  # conversión de días a años
+print(f'2.b.a) {{P_solar = {P_solar:.2f} años}}')
+
+# Truncar los coeficientes: usar los primeros M armónicos
+M = 50
+X_fft_trunc = np.zeros_like(X_fft, dtype=complex)
+# Se conserva el componente DC y las M frecuencias positivas
+X_fft_trunc[:M+1] = X_fft[:M+1]
+# Se conservan las correspondientes frecuencias negativas (excepto DC)
+if M > 1:
+    X_fft_trunc[-(M-1):] = X_fft[-(M-1):]
+
+# Reconstruir la señal ajustada en el intervalo original
+y_fit = np.fft.ifft(X_fft_trunc).real
+
+# Función para extrapolar evaluando la serie de Fourier
+def extrapolate_fourier(X_trunc, t_eval, N, M):
+    # Índices de los armónicos: 0 a M y los correspondientes negativos
+    pos_indices = np.arange(0, M+1)
+    neg_indices = np.arange(N - (M-1), N) if M > 1 else np.array([], dtype=int)
+    k_indices = np.concatenate((pos_indices, neg_indices))
+    X_reduced = X_trunc[k_indices]
+    # y(t) = (1/N) * sum_{k in k_indices} X[k] exp(2πi * k * t / N)
+    exponent = 2j * np.pi * np.outer(t_eval, k_indices) / N
+    y_extrap = np.dot(np.exp(exponent), X_reduced) / N
+    return y_extrap.real
+
+# Preparar extrapolación
+fecha_inicio_extrapolacion = data["Date"].max()
+fecha_extrapolacion = pd.to_datetime(fecha_extrapolacion_str)
+# Se suma 1 para incluir el último día en el rango de extrapolación
+dias_extrapolacion = (fecha_extrapolacion - fecha_inicio_extrapolacion).days + 1
+
+t_future = np.arange(N, N + dias_extrapolacion)
+y_extrap = extrapolate_fourier(X_fft_trunc, t_future, N, M)
+
+# Predicción del número de manchas solares en la fecha final
+n_manchas_hoy = y_extrap[-1]
+print(f'2.b.b) {{n_manchas_hoy = {n_manchas_hoy:.2f}}}')
+
+# Crear rango de fechas para la extrapolación
+future_dates = pd.date_range(start=fecha_inicio_extrapolacion, periods=dias_extrapolacion, freq="D")
+
+# Graficar: datos originales, ajuste en el intervalo conocido y extrapolación
+plt.figure(figsize=(20, 5), dpi=100)
+plt.scatter(data["Date"], y, s=2, color='green', alpha=0.6, label="Datos originales")
+plt.plot(data["Date"], y_fit, color='black', linewidth=2, label="Ajuste FFT en datos históricos")
+plt.plot(future_dates, y_extrap, color="red", linewidth=2, linestyle='dashed',
+         label=f"Predicción FFT hasta {fecha_extrapolacion.strftime('%Y-%m-%d')}")
+# Asegurarse de que el eje x abarque desde la primera fecha hasta la fecha final de extrapolación
+plt.xlim(data["Date"].min(), fecha_extrapolacion)
+plt.xlabel("Fecha", fontsize=14)
+plt.ylabel("Número de manchas solares", fontsize=14)
+plt.title(f"Extrapolación del ciclo solar con FFT hasta {fecha_extrapolacion.strftime('%Y-%m-%d')}", fontsize=16)
+plt.legend()
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.show()
