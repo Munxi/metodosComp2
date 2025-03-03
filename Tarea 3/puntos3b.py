@@ -127,6 +127,6 @@ def punto2():
                         , interval=7000/nframes, blit=True)
 
     # Mostrar la animación
-    ani.save(filename="1.a.gif")
+    ani.save(filename="2.gif")
 punto1()
 punto2()
