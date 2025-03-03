@@ -40,7 +40,7 @@ def punto1():
     ax.set_xlim([-1, 1])
     ax.set_ylim([-1, 1])
     surf = ax2.plot_surface(X, Y, U, cmap='jet', edgecolor='none', linewidth=0, antialiased=True)
-    ax2.view_init(elev=40, azim=240)
+    ax2.view_init(elev=55,azim=240)
     ax2.set_xticks([])
     ax2.set_yticks([])
     ax2.set_zticks([])
