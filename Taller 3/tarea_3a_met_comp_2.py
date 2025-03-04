@@ -176,7 +176,7 @@ print("Energías Permitidas:")
 print(energias_df.to_string(index=False))
 
 # Instalar paquetes requeridos (en Google Colab, ejecutar esta línea antes de ejecutar el código)
-!apt-get install ffmpeg -y
+# !apt-get install ffmpeg -y
 
 # Importar bibliotecas
 import numpy as np
