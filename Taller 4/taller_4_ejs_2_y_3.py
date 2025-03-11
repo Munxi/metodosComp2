@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 ###############################################################################
-#                             EXERCISE 2                                      #
+#                             EJERCICIO 2                                     #
 ###############################################################################
 # Parámetros (en cm):
 D1 = 50.0       # Distancia desde la fuente hasta las rendijas (cm)
@@ -99,7 +99,7 @@ plt.savefig('2.pdf')
 plt.show()
 
 ###############################################################################
-#                             EXERCISE 3                                      #
+#                            EJERCICIO 3                                      #
 ###############################################################################
 N = 150       # Tamaño de la red (N x N)
 J = 0.2       # Interacción de acoplamiento
